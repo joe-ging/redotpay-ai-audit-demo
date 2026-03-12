@@ -10,7 +10,7 @@ let currentContext = null;
 
 // Initialize UI
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("🚀 RedotPay AI-Audit Demo v1.0.5 Active");
+    console.log("🚀 RedotPay AI-Audit Demo v1.0.6 Active");
     loadTransactions();
     setupChat();
 });
@@ -152,7 +152,7 @@ async function handleUserInput() {
         document.getElementById(typingId).remove();
 
         // Add bot message
-        addLog("[RT] Intent: " + (data.action || "GREETING") + (category !== "UNK" ? " (v1.0.3)" : ""), 'success');
+        addLog("[RT] Intent: " + (data.action || "GREETING") + " (v1.0.6)", 'success');
         addMessage(data.text, 'bot');
 
         // Handle specific actions

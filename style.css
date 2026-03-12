@@ -15,10 +15,12 @@
 }
 
 html, body {
-    height: 100%;
-    overflow: hidden; /* STOP PAGE SCROLLING */
-    position: fixed; /* Prevents bounce scrolling on mobile */
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden; /* ABSOLUTE LOCK */
+    position: fixed;
     width: 100%;
+    overscroll-behavior: none;
 }
 
 body {
@@ -29,9 +31,9 @@ body {
 
 .app-container {
     display: grid;
-    grid-template-columns: 240px 1fr 320px;
+    grid-template-columns: 240px minmax(0, 1fr) 320px;
     height: 100vh;
-    height: 100dvh; /* Dynamic viewport height for mobile browsers */
+    height: 100dvh;
     width: 100vw;
     overflow: hidden;
 }
@@ -245,10 +247,11 @@ body {
     border-left: 1px solid var(--glass-border);
     display: flex;
     flex-direction: column;
-    height: 100%; /* Relative to grid */
-    max-height: 100vh;
+    height: 100dvh;
+    width: 320px;
     position: relative;
     overflow: hidden;
+    flex-shrink: 0;
 }
 
 .chat-header {
@@ -276,12 +279,14 @@ body {
 .chat-messages {
     flex: 1;
     padding: 20px;
-    overflow-y: scroll; /* Force scrolling context */
+    overflow-y: scroll;
     display: flex;
     flex-direction: column;
+    justify-content: flex-start; /* Ensure messages start from top and push up */
     gap: 15px;
     min-height: 0;
-    -webkit-overflow-scrolling: touch; /* For iOS compatibility */
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
 }
 
 .msg {
