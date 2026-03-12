@@ -10,7 +10,7 @@ let currentContext = null;
 
 // Initialize UI
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("🚀 RedotPay AI-Audit Demo v1.0.4 Active");
+    console.log("🚀 RedotPay AI-Audit Demo v1.0.5 Active");
     loadTransactions();
     setupChat();
 });
@@ -112,10 +112,15 @@ async function handleUserInput() {
             return;
         }
         else {
-            if (/\b(how|apply|get|physical|where|card|account)\b/i.test(msg)) category = "FAQ";
-            if (/\b(why|decline|fail|status|transaction|audit|order|declined)\b/i.test(msg)) category = "Ops";
-            if (/\b(lost|stolen|block|freeze|lock|security|lost card)\b/i.test(msg)) category = "Risk";
-            if (/\b(balance|money|total|usdt|crypto|wallet|asset)\b/i.test(msg)) category = "Balance";
+            if (/\b(how|apply|get|physical|where|card|account|order|fee)\b/i.test(msg)) category = "FAQ";
+            if (/\b(why|decline|fail|status|transaction|audit|order|declined|refused|rejected)\b/i.test(msg)) category = "Ops";
+            if (/\b(lost|stolen|block|freeze|lock|security|lost card|stop)\b/i.test(msg)) category = "Risk";
+            if (/\b(balance|money|total|usdt|crypto|wallet|asset|cash|funds)\b/i.test(msg)) category = "Balance";
+        }
+
+        // Handle junk/asdf inputs better
+        if (category === "UNK" && msg.length > 3 && !isConfirm && !isDeny) {
+            addLog("[RT] Lvl 2 Check: Ambiguous Input", 'info');
         }
 
         let data;
