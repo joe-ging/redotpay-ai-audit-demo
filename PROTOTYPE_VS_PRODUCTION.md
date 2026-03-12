@@ -1,7 +1,6 @@
 # 🏗️ RedotPay AI-Audit: 原型与生产环境对比指南
 
-> [!IMPORTANT]
-> **技术面试快速参考 (针对 CTO/CEO 深访)**
+> **核心技术 FAQ (Technical Deep-Dive)**
 > 
 > **问：意图路由 (Intent Routing) 是异步的吗？**
 > *   **答**：是的。在此原型中，我们使用了异步的 `setTimeout`（前端）或 `async/await`（后端）来模拟 AI 的思考过程。在生产环境中，这会演进为完整的 **事件驱动架构 (Event-Driven Architecture)**。UI 会立即反馈“正在分析”状态，而 Agent 路由在后台异步处理逻辑，确保主线程永不阻塞，提供丝滑的支付级交互体验。
