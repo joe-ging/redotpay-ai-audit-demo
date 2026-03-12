@@ -267,6 +267,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    min-height: 0; /* CRITICAL: Enables scrolling in flex container */
 }
 
 .msg {

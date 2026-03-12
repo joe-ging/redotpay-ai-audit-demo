@@ -93,60 +93,65 @@ async function handleUserInput() {
         const msg = text.toLowerCase();
         let category = "UNK";
         
-        // --- 🏗️ CONTEXT-AWARE ROUTING (Deep Intelligence) ---
+        // --- 🏗️ CONTEXT-AWARE ROUTING (State-of-the-art Matcher) ---
         
-        // Context 1: Balance Confirmation
-        const isConfirm = /^(yes|sure|ok|okay|yep|y|go ahead|proceed|do it|check)$/i.test(msg);
-        const isDeny = /^(no|stop|nevermind|cancel|n|dont)$/i.test(msg);
+        // Match confirmations more loosely (not just anchors ^ and $)
+        const isConfirm = /\b(yes|sure|ok|okay|yep|y|go ahead|proceed|do it|check|yeah|yup|fine)\b/i.test(msg);
+        const isDeny = /\b(no|stop|nevermind|cancel|n|dont|wait|not now)\b/i.test(msg);
+
+        console.log(`[AI Engine] Context: ${currentContext}, Input: "${msg}", IsConfirm: ${isConfirm}`);
 
         if (currentContext === "AUDIT_RECOVERY" && isConfirm) {
             category = "Balance";
         } 
         else if (currentContext === "AUDIT_RECOVERY" && isDeny) {
-            addMessage("No problem. Transaction audit paused.", "bot");
+            addMessage("Understood. I've cancelled the audit. Anything else I can help with?", "bot");
             currentContext = null;
             document.getElementById(typingId).remove();
             return;
         }
-        // General Intent Detection
         else {
-            if (/\b(how|apply|get|physical|where)\b/i.test(msg)) category = "FAQ";
-            if (/\b(why|decline|fail|status|transaction|audit|order)\b/i.test(msg)) category = "Ops";
-            if (/\b(lost|stolen|block|freeze|lock|security|card)\b/i.test(msg)) category = "Risk";
-            if (/\b(balance|money|total|usdt|crypto|wallet)\b/i.test(msg)) category = "Balance";
+            if (/\b(how|apply|get|physical|where|card|account)\b/i.test(msg)) category = "FAQ";
+            if (/\b(why|decline|fail|status|transaction|audit|order|declined)\b/i.test(msg)) category = "Ops";
+            if (/\b(lost|stolen|block|freeze|lock|security|lost card)\b/i.test(msg)) category = "Risk";
+            if (/\b(balance|money|total|usdt|crypto|wallet|asset)\b/i.test(msg)) category = "Balance";
         }
 
-        // Action Triggering
         let data;
         
         // 🤝 Human-in-the-Loop (HITL) Check
         if (msg.includes("human") || msg.includes("agent") || msg.includes("person") || msg.includes("operator")) {
             data = {
-                text: "Handing over to a RedotPay Human Specialist. Estimated wait time: 2 mins. (Context: " + (currentContext || "General") + ")",
+                text: "Handing over to a RedotPay Human Specialist. Estimated wait time: 2 mins.",
                 action: "HITL_ESCALATION"
             };
         } else if (category !== "UNK") {
             data = domainAgents[category](msg);
-            // Update context based on agent action (e.g., if agent asks a question)
-            if (data.action === "AUDIT_RECOVERY") currentContext = "AUDIT_RECOVERY";
-            else currentContext = null;
+            // PERSIST CONTEXT if it's an audit
+            if (data.action === "AUDIT_RECOVERY") {
+                currentContext = "AUDIT_RECOVERY";
+                addLog("[MEM] Saved Context: AUDIT_WAIT", 'info');
+            } else {
+                currentContext = null;
+            }
         } else {
             data = {
                 text: "I'm not sure about that. I can help with 'How to apply', 'Transaction status', 'Balance', or 'Card security'. Or type 'human' to talk to us.",
                 action: "GREETING"
             };
+            currentContext = null;
         }
 
         // Remove typing indicator
         document.getElementById(typingId).remove();
 
         // Add bot message
-        addLog("[RT] Intent matched: " + (data.action || "GREETING"), 'success');
+        addLog("[RT] Intent: " + (data.action || "GREETING") + (category !== "UNK" ? " (v1.0.3)" : ""), 'success');
         addMessage(data.text, 'bot');
 
         // Handle specific actions
         if (data.action === 'SECURITY_PROTOCOL') {
-            addLog("[SEC] CRITICAL: Initiating card lockdown", 'info');
+            addLog("[SEC] CRITICAL: Card Lockdown", 'info');
             triggerCardBlock();
         }
     }, 800);
@@ -159,7 +164,6 @@ function addLog(text, type) {
     entry.className = `log-entry ${type}`;
     entry.textContent = text;
     container.prepend(entry);
-    container.scrollTop = 0; // Logs prepend, so scroll to top
 }
 
 function addMessage(text, type) {
@@ -167,22 +171,24 @@ function addMessage(text, type) {
     if (!container) return;
     
     const div = document.createElement('div');
-    const id = "msg-" + Date.now() + Math.random().toString(36).substr(2, 5);
+    const id = "msg-" + Math.random().toString(36).substring(7);
     div.id = id;
     div.className = `msg ${type}`;
     div.textContent = text;
     container.appendChild(div);
     
-    // Force Scroll to bottom
-    // We use both scrollHeight assignment and scrollIntoView for max compatibility
+    // 🧱 BULLETPROOF SCROLLING
     const scrollBottom = () => {
         container.scrollTop = container.scrollHeight;
         div.scrollIntoView({ behavior: 'smooth', block: 'end' });
     };
 
-    // Execute immediately and then after a short delay for image/render lag
+    // Try immediately
     scrollBottom();
-    setTimeout(scrollBottom, 100);
+    
+    // Try again after 50ms and 200ms to handle different browser rendering speeds
+    setTimeout(scrollBottom, 50);
+    setTimeout(scrollBottom, 200);
     
     return id;
 }
