@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RedotPay | AI-Audit Agent Showcase</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body class="dark-theme">
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="logo">
+                <img src="redot_logo.png" alt="RedotPay Official Logo" class="official-logo">
+                <span class="badge">AI-AUDIT</span>
+            </div>
+            <ul class="nav-links">
+                <li class="active"><i class="icon">📊</i> Dashboard</li>
+                <li><i class="icon">💳</i> My Cards</li>
+                <li><i class="icon">💸</i> Transactions</li>
+                <li><i class="icon">🛡️</i> Security</li>
+            </ul>
+            <div class="metrics-panel">
+                <div class="metric-item">
+                    <label>AUTOMATION</label>
+                    <div class="value">92%</div>
+                    <div class="progress-bar"><div class="fill" style="width: 92%"></div></div>
+                </div>
+                <div class="metric-item">
+                    <label>AI LATENCY</label>
+                    <div class="value">148ms</div>
+                </div>
+            </div>
+            
+            <footer class="sidebar-footer">
+                <div class="badges-row">
+                    <span class="badge secondary">VISA</span>
+                    <span class="badge secondary">MC</span>
+                    <span class="badge secondary">PCI-DSS</span>
+                </div>
+                <p>Digital Asset Solution v1.0.2</p>
+                <p class="signature">Made by Margot (Jing Zhou)</p>
+            </footer>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-bar">
+                <div class="user-profile">
+                    <div class="avatar">JZ</div>
+                    <div class="user-info">
+                        <span class="name">Jing Zhou</span>
+                        <span class="status">Premium User</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="dashboard-grid">
+                <!-- Card Overview -->
+                <section class="card-display glass">
+                    <h3>Virtual Card Overview</h3>
+                    <div class="card-wrapper">
+                        <img src="redot_card.png" alt="RedotPay Premium Black Card" class="virtual-card-img">
+                        <div id="card-status-overlay" class="overlay hidden">SECURITY LOCK</div>
+                    </div>
+                    <div class="card-details">
+                        <p>Ending in <strong>*9922</strong></p>
+                        <p>Status: <span id="card-status-text" class="status-pill active">ACTIVE</span></p>
+                    </div>
+                </section>
+
+                <!-- Recent Transactions -->
+                <section class="transactions-list glass">
+                    <div class="section-header">
+                        <h3>Recent Transactions</h3>
+                        <a href="#" class="view-all">View All</a>
+                    </div>
+                    <div class="tx-items" id="tx-items">
+                        <!-- Filled by JS -->
+                    </div>
+                </section>
+
+                <!-- NEW: AI Audit Logs -->
+                <section class="audit-logs glass">
+                    <div class="section-header">
+                        <h3>AI Reasoning Logs</h3>
+                        <span class="live-pulse">LIVE AUDIT</span>
+                    </div>
+                    <div class="log-container" id="log-container">
+                        <div class="log-entry info"> [SYS] Initializing WKA Engine... </div>
+                        <div class="log-entry success"> [SEC] Kernel Integrity Verified (128-bit) </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- AI Assistant / Chat Overlay -->
+        <aside class="ai-assistant shadow">
+            <div class="chat-header">
+                <div class="agent-avatar">🛡️</div>
+                <div class="chat-info">
+                    <h4>AI-Audit Agent</h4>
+                    <p>Powered by WKA Architecture</p>
+                </div>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <div class="msg bot">
+                    Hello Jing! I'm your RedotPay AI-Audit Agent. How can I assist with your transactions or security today?
+                </div>
+            </div>
+            <div class="chat-input-area">
+                <input type="text" id="chat-input" placeholder="Ask about a declined charge or lost card...">
+                <button id="send-btn">🚀</button>
+            </div>
+            <div class="chat-hints">
+                <button onclick="sendHint('Why was my last order declined?')">Declined Order?</button>
+                <button onclick="sendHint('I lost my card!')">Lost Card?</button>
+                <button onclick="sendHint('Show my balance')">Balance?</button>
+            </div>
+        </aside>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
