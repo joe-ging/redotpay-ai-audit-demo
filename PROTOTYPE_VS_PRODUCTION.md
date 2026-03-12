@@ -1,53 +1,53 @@
-# 🏗️ RedotPay AI-Audit: Prototype vs. Production Guide
+# 🏗️ RedotPay AI-Audit: 原型与生产环境对比指南
 
 > [!IMPORTANT]
-> **Technical Interview Quick-Ref (CTO/CEO Deep-Dive)**
+> **技术面试快速参考 (针对 CTO/CEO 深访)**
 > 
-> **Q: Is the Intent Routing asynchronous?**
-> *   **Answer**: Yes. In this prototype, we use an asynchronous `setTimeout` (frontend) or `async/await` (server) to simulate AI thinking. In production, this would be a full **Event-Driven Architecture**. The UI updates immediately with a "Thinking/Analyzing" state while the Agentic router processes the logic in the background to ensure no blocking of the main thread.
+> **问：意图路由 (Intent Routing) 是异步的吗？**
+> *   **答**：是的。在此原型中，我们使用了异步的 `setTimeout`（前端）或 `async/await`（后端）来模拟 AI 的思考过程。在生产环境中，这会演进为完整的 **事件驱动架构 (Event-Driven Architecture)**。UI 会立即反馈“正在分析”状态，而 Agent 路由在后台异步处理逻辑，确保主线程永不阻塞，提供丝滑的支付级交互体验。
 > 
-> **Q: Why Fuzzy Matching instead of a Vector Database (VDB) for this Demo?**
-> *   **Answer**: Speed and precision for fixed intents. For a 1.0 prototype, regular expressions and keyword matching (Deterministic Routing) guarantee 100% accuracy for critical actions like "Card Lock". We've documented the transition to **Semantic Vector Search (RAG)** in Section 1 below for handling more ambiguous natural language in production.
+> **问：为什么这个演示用模糊匹配而不是向量数据库 (Vector DB)？**
+> *   **答**：为了在特定场景下的**极致响应速度与 100% 确定性**。对于 1.0 版本的原型，正则表达式和关键词匹配（确定性路由）能保证在处理“锁卡”等高风险操作时 100% 准确。我们在下方第一部分详细规划了向 **语义向量搜索 (RAG)** 的迁移路径，以处理更复杂的自然语言模糊意图。
 > 
-> **Q: What is the underlying mechanism (Track 3)?**
-> *   **Answer**: It's a **Wrapper-Knowledge-Agentic (WKA)** architecture. The "Wrapper" is the UI/UX, the "Knowledge" is our mock transaction store, and the "Agentic" part is the Router that intelligently hands off requests to specialized Domain Agents (FAQ, Risk, Ops).
+> **问：底层的技术架构机制是什么 (Track 3)？**
+> *   **答**：它基于 **WKA (Wrapper-Knowledge-Agentic)** 架构。"Wrapper"（封装层）即 UI/UX 表现层，"Knowledge"（知识层）是我们模拟的交易数据库，而 "Agentic"（智能体层）则是核心路由器，它能智能地将请求分发给专门的领域 Agent（如 FAQ 客服、风控审计、运维支持）。
 
 ---
 
-This document outlines the technical gap between this **v1 Prototype** and the **Enterprise-Grade Solution** suitable for RedotPay's 5M users.
+本文件详细说明了此 **v1 原型** 与适用于 RedotPay 500 万用户的 **企业级合规方案** 之间的技术差距。
 
 ---
 
-## 🛰️ 1. Intent Routing & Memory
-| Feature | Current Prototype | Production Solution |
+## 🛰️ 1. 意图路由与内存管理 (Routing & Memory)
+| 功能 | 当前原型 (Prototype) | 生产级方案 (Production) |
 | :--- | :--- | :--- |
-| **Routing Mechanism** | **Keyword-based / Regex**. High speed but low flexibility. | **Vector Embeddings (Semantic Search)**. Using `text-embedding-3-small` stored in **Pinecone** or **Milvus** to understand intent even with typos or slang. |
-| **Logic Layer** | `if/else` logic in `server.js`. | **LLM-Based Classifier**. A small model (like GPT-4o-mini) acts as the router to decide which sub-agent handles the ticket. |
-| **Memory** | Resets on page refresh. | **Redis-backed Long-Term Memory**. Remembers "Jing lost her card 2 days ago" even when the user re-opens the app a week later. |
+| **路由机制** | **基于关键词/正则**。速度极快但灵活性有限。 | **向量嵌入 (语义搜索)**。采用 `text-embedding-3-small` 并存储在 **Pinecone** 或 **Milvus** 中，识别错别字或俚语语义。 |
+| **逻辑决策层** | 简单的 `if/else` 逻辑。 | **基于大模型的分类器**。使用小型模型（如 GPT-4o-mini）作为决策中枢，决定由哪个子 Agent 处理工单。 |
+| **上下文内存** | 页面刷新即重置。 | **Redis 持久化长期记忆**。能记住“Jing 两天前丢了卡”，即使一周后重新打开 App，AI 依然有记忆上下文。 |
 
-## 📁 2. Data & Knowledge Base
-| Feature | Current Prototype | Production Solution |
+## 📁 2. 数据与知识库 (Data & Knowledge)
+| 功能 | 当前原型 (Prototype) | 生产级方案 (Production) |
 | :--- | :--- | :--- |
-| **Knowledge Base** | Fixed scripts in `domainAgents`. | **RAG (Retrieval-Augmented Generation)**. Dynamically crawls RedotPay's internal confluence/documentation to answer new policy questions without re-coding. |
-| **Backend Integration** | Mock JSON data in `/services`. | **PostgreSQL / MongoDB**. Real-time read/write via RedotPay's core API with full transaction ledger consistency. |
+| **知识获取** | 静态定义的 `domainAgents` 脚本。 | **RAG (检索增强生成)**。动态爬取 RedotPay 内部文档库，实现政策更新无需重新编码即可同步更新 AI 回复。 |
+| **后端集成** | `/services` 里的模拟 JSON 数据。 | **PostgreSQL / MongoDB**。通过 RedotPay 核心 API 进行实时读写，确保交易流水账本的一致性。 |
 
-## 🛡️ 3. Security & Compliance
-| Feature | Current Prototype | Production Solution |
+## 🛡️ 3. 安全与合规 (Security & Compliance)
+| 功能 | 当前原型 (Prototype) | 生产级方案 (Production) |
 | :--- | :--- | :--- |
-| **Authentication** | None (Public access). | **JWT + OAuth2**. Full bank-level authentication to ensure the AI only sees data authorized for that specific user. |
-| **PII Data Handling** | Visible in console. | **PII Masking Layer**. A middleware that scrubs Card Numbers (PAN) and CVVs before sending text to external LLM providers (OpenAI/Claude). |
-| **Risk Trigger** | Simulated `SECURITY_PROTOCOL`. | **Webhooks / Smart Contracts**. Direct integration with card issuer processors to freeze cards in <50ms upon AI-detected fraud. |
+| **身份验证** | 无（公共访问）。 | **JWT + OAuth2**。银行级身份验证，确保 AI 只能访问该特定用户授权的数据。 |
+| **隐私数据处理** | 控制台可见。 | **PII 脱敏层 (Masking Layer)**。中间件在将文本发送给外部模型前，自动掩盖卡号 (PAN) 和 CVV 等敏感信息。 |
+| **风险触发** | 模拟的 `SECURITY_PROTOCOL`。 | **Webhooks / 智能合约**。直连发卡行处理器，在 AI 检测到欺诈后 50 毫秒内硬隔离冻结卡片。 |
 
-## 📊 4. Performance & Scalability
-| Feature | Current Prototype | Production Solution |
+## 📊 4. 性能与扩展性 (Scalability)
+| 功能 | 当前原型 (Prototype) | 生产级方案 (Production) |
 | :--- | :--- | :--- |
-| **Architecture** | Single-threaded Node.js server. | **Asynchronous Microservices**. Using Go/Rust for high-concurrency payment hooks, and Python for the Agentic orchestration layer. |
-| **Concurrency** | Limited by local machine. | **Kubernetes Auto-scaling**. Dynamically spins up new Agent instances during peak promotional campaigns (e.g., Binance-RedotPay card drops). |
+| **底层架构** | 单线程 Node.js 服务器。 | **异步微服务**。采用 Go/Rust 处理高并发支付钩子，Python 处理 Agent 编排层。 |
+| **并发处理** | 受限于本地机器。 | **Kubernetes 弹性伸缩**。在 Binance-RedotPay 联动活动等流量高峰期，动态自动扩容 Agent 实例。 |
 
 ---
 
-### 🚀 Roadmap Recommendation
-1. **Phased Integration**: Don't replace the whole system. Start by replacing the `FAQ` layer with a RAG-based Vector DB (Pinecone).
-2. **"Agent-on-Call"**: Use this prototype's **Heartbeat Mechanism** to manage state, ensuring a 99.9% uptime for the AI layer during high-traffic events.
+### 🚀 演进路径建议
+1. **模块化集成**：不要全盘更替，先将 FAQ 层替换为基于向量数据库 (RAG) 的方案。
+2. **“Agent 守护机制”**：借鉴此原型的 **心跳检测 (Heartbeat Mechanism)** 来管理状态，确保 AI 层在流量尖峰时的 99.9% 稳定性。
 
-*Document prepared by Margot (Jing Zhou) for the RedotPay CTO / Engineering Team.*
+*本文件由 Margot (Jing Zhou) 为 RedotPay CTO / 工程团队准备。*
