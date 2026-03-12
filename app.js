@@ -93,28 +93,30 @@ async function handleUserInput() {
         const msg = text.toLowerCase();
         let category = "UNK";
         
-        // --- 🏗️ CONTEXT-AWARE ROUTING (Intelligence Boost) ---
+        // --- 🏗️ CONTEXT-AWARE ROUTING (Deep Intelligence) ---
         
-        // Handle Confirmations (Yes/Sure/Okay)
-        if (currentContext === "AUDIT_RECOVERY" && (msg.includes("sure") || msg.includes("yes") || msg.includes("ok") || msg.includes("go ahead"))) {
+        // Context 1: Balance Confirmation
+        const isConfirm = /^(yes|sure|ok|okay|yep|y|go ahead|proceed|do it|check)$/i.test(msg);
+        const isDeny = /^(no|stop|nevermind|cancel|n|dont)$/i.test(msg);
+
+        if (currentContext === "AUDIT_RECOVERY" && isConfirm) {
             category = "Balance";
-            currentContext = null;
         } 
-        // Handle "No/Stop"
-        else if (currentContext && (msg.includes("no") || msg.includes("stop") || msg.includes("nevermind"))) {
-            addMessage("Understood. Let me know if you need anything else.", "bot");
+        else if (currentContext === "AUDIT_RECOVERY" && isDeny) {
+            addMessage("No problem. Transaction audit paused.", "bot");
             currentContext = null;
             document.getElementById(typingId).remove();
             return;
         }
-        // Normal Intent Detection
+        // General Intent Detection
         else {
-            if (msg.includes("how") || msg.includes("apply") || msg.includes("can i")) category = "FAQ";
-            if (msg.includes("why") || msg.includes("order") || msg.includes("declined") || msg.includes("status")) category = "Ops";
-            if (msg.includes("lost") || msg.includes("stolen") || msg.includes("block") || msg.includes("freeze")) category = "Risk";
-            if (msg.includes("balance") || msg.includes("money") || msg.includes("total") || msg.includes("usdt")) category = "Balance";
+            if (/\b(how|apply|get|physical|where)\b/i.test(msg)) category = "FAQ";
+            if (/\b(why|decline|fail|status|transaction|audit|order)\b/i.test(msg)) category = "Ops";
+            if (/\b(lost|stolen|block|freeze|lock|security|card)\b/i.test(msg)) category = "Risk";
+            if (/\b(balance|money|total|usdt|crypto|wallet)\b/i.test(msg)) category = "Balance";
         }
 
+        // Action Triggering
         let data;
         
         // 🤝 Human-in-the-Loop (HITL) Check
@@ -163,20 +165,24 @@ function addLog(text, type) {
 function addMessage(text, type) {
     const container = document.getElementById('chat-messages');
     if (!container) return;
+    
     const div = document.createElement('div');
-    const id = "msg-" + Date.now();
+    const id = "msg-" + Date.now() + Math.random().toString(36).substr(2, 5);
     div.id = id;
     div.className = `msg ${type}`;
     div.textContent = text;
     container.appendChild(div);
     
-    // 🔥 FIX: Ensure scroll happens AFTER DOM update
-    setTimeout(() => {
-        container.scrollTo({
-            top: container.scrollHeight,
-            behavior: 'smooth'
-        });
-    }, 50);
+    // Force Scroll to bottom
+    // We use both scrollHeight assignment and scrollIntoView for max compatibility
+    const scrollBottom = () => {
+        container.scrollTop = container.scrollHeight;
+        div.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    };
+
+    // Execute immediately and then after a short delay for image/render lag
+    scrollBottom();
+    setTimeout(scrollBottom, 100);
     
     return id;
 }

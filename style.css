@@ -282,6 +282,13 @@ body {
     align-self: flex-start;
 }
 
+.msg.typing {
+    font-style: italic;
+    color: var(--text-dim);
+    background: transparent;
+    border: 1px solid var(--glass-border);
+}
+
 .msg.user {
     background: var(--accent-red);
     align-self: flex-end;
