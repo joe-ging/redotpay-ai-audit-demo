@@ -10,6 +10,7 @@ let currentContext = null;
 
 // Initialize UI
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("🚀 RedotPay AI-Audit Demo v1.0.4 Active");
     loadTransactions();
     setupChat();
 });
@@ -177,18 +178,17 @@ function addMessage(text, type) {
     div.textContent = text;
     container.appendChild(div);
     
-    // 🧱 BULLETPROOF SCROLLING
-    const scrollBottom = () => {
+    // 🏗️ HARDWARE-ACCELERATED SCROLLING
+    // Ensures scrolling happens after DOM paint
+    requestAnimationFrame(() => {
         container.scrollTop = container.scrollHeight;
         div.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    };
-
-    // Try immediately
-    scrollBottom();
-    
-    // Try again after 50ms and 200ms to handle different browser rendering speeds
-    setTimeout(scrollBottom, 50);
-    setTimeout(scrollBottom, 200);
+        
+        // Double check after 100ms for safety
+        setTimeout(() => {
+            container.scrollTop = container.scrollHeight;
+        }, 100);
+    });
     
     return id;
 }
