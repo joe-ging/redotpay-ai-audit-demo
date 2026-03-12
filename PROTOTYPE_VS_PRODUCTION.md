@@ -1,5 +1,8 @@
 # 🏗️ RedotPay AI-Audit: 原型与生产环境对比指南
 
+> 🚀 **在线演示**: [joe-ging.github.io/redotpay-ai-audit-demo/](https://joe-ging.github.io/redotpay-ai-audit-demo/)  
+> 💻 **代码仓库**: [github.com/joe-ging/redotpay-ai-audit-demo](https://github.com/joe-ging/redotpay-ai-audit-demo)
+
 > **核心技术 FAQ (Technical Deep-Dive)**
 > 
 > **问：意图路由 (Intent Routing) 是异步的吗？**
