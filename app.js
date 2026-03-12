@@ -45,6 +45,34 @@ function sendHint(text) {
     handleUserInput();
 }
 
+// 🔹 Domain Agents Logic Simulation (Migrated from Server for Static Hosting)
+const domainAgents = {
+    FAQ: (msg) => {
+        return { text: "INFO: You can apply for a RedotPay physical card in the app under the 'Card' tab. Fee is $100.", action: "FAQ_RESOLVE" };
+    },
+    Ops: (msg) => {
+        const lastDeclined = transactions.find(t => t.status === "DECLINED");
+        return {
+            text: `ACTION: I've audited your last payment at "${lastDeclined.description}". It was declined due to "${lastDeclined.reason}". Shall I check your balance?`,
+            action: "AUDIT_RECOVERY",
+            data: lastDeclined
+        };
+    },
+    Risk: (msg) => {
+        return {
+            text: "🚨 SECURITY ACTION: I've detected a high-sensitivity request. I am temporarily locking your Virtual Card *9922 for your protection. Confirm to proceed?",
+            action: "SECURITY_PROTOCOL",
+            priority: "CRITICAL"
+        };
+    },
+    Balance: (msg) => {
+        return {
+            text: "Your current liquidity is 1,240.50 USDT. You have an additional 0.42 BTC in 'Earn' vaults.",
+            action: "FINANCIAL_SNAPSHOT"
+        };
+    }
+};
+
 async function handleUserInput() {
     const input = document.getElementById('chat-input');
     const text = input.value.trim();
@@ -57,13 +85,33 @@ async function handleUserInput() {
     const typingId = addMessage("Analyzing intent...", 'bot typing');
     addLog("[NLP] Input detected: " + text, 'info');
 
-    try {
-        const response = await fetch('/api/agent/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: text })
-        });
-        const data = await response.json();
+    // Simulate Network Latency
+    setTimeout(() => {
+        const msg = text.toLowerCase();
+        let category = "UNK";
+        
+        // 🏗️ Multi-Layer Intent Router (Layer 1: Classification)
+        if (msg.includes("how") || msg.includes("apply") || msg.includes("can i")) category = "FAQ";
+        if (msg.includes("why") || msg.includes("order") || msg.includes("declined") || msg.includes("status")) category = "Ops";
+        if (msg.includes("lost") || msg.includes("stolen") || msg.includes("block") || msg.includes("freeze")) category = "Risk";
+        if (msg.includes("balance") || msg.includes("money") || msg.includes("usdt")) category = "Balance";
+
+        let data;
+        
+        // 🤝 Human-in-the-Loop (HITL) Check
+        if (msg.includes("human") || msg.includes("agent") || msg.includes("person") || msg.includes("operator")) {
+            data = {
+                text: "Handing over to a RedotPay Human Specialist. Estimated wait time: 2 mins.",
+                action: "HITL_ESCALATION"
+            };
+        } else if (category !== "UNK") {
+            data = domainAgents[category](msg);
+        } else {
+            data = {
+                text: "I'm not sure about that. I can help with 'How to apply', 'Transaction status', 'Balance', or 'Card security'. Or type 'human' to talk to us.",
+                action: "GREETING"
+            };
+        }
 
         // Remove typing indicator
         document.getElementById(typingId).remove();
@@ -77,12 +125,7 @@ async function handleUserInput() {
             addLog("[SEC] CRITICAL: Initiating card lockdown", 'info');
             triggerCardBlock();
         }
-
-    } catch (err) {
-        console.error(err);
-        addLog("[ERR] Router failure", 'info');
-        document.getElementById(typingId).textContent = "Oops! Connection audit failed. Please try again.";
-    }
+    }, 800);
 }
 
 function addLog(text, type) {
