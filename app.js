@@ -10,7 +10,7 @@ let currentContext = null;
 
 // Initialize UI
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("🚀 RedotPay AI-Audit Demo v1.0.6 Active");
+    console.log("🚀 RedotPay AI-Audit Demo v1.0.7 Active");
     loadTransactions();
     setupChat();
 });
@@ -183,17 +183,16 @@ function addMessage(text, type) {
     div.textContent = text;
     container.appendChild(div);
     
-    // 🏗️ HARDWARE-ACCELERATED SCROLLING
-    // Ensures scrolling happens after DOM paint
-    requestAnimationFrame(() => {
+    // 🏗️ STRICT INTER-CONTAINER SCROLLING
+    // We avoid scrollIntoView because it can shift the entire layout
+    const scrollToBottom = () => {
         container.scrollTop = container.scrollHeight;
-        div.scrollIntoView({ behavior: 'smooth', block: 'end' });
-        
-        // Double check after 100ms for safety
-        setTimeout(() => {
-            container.scrollTop = container.scrollHeight;
-        }, 100);
-    });
+    };
+
+    scrollToBottom();
+    // Double check after render
+    setTimeout(scrollToBottom, 50);
+    setTimeout(scrollToBottom, 150);
     
     return id;
 }

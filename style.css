@@ -30,12 +30,12 @@ body {
 }
 
 .app-container {
-    display: grid;
-    grid-template-columns: 240px minmax(0, 1fr) 320px;
+    display: flex;
+    width: 100vw;
     height: 100vh;
     height: 100dvh;
-    width: 100vw;
     overflow: hidden;
+    position: relative;
 }
 
 /* Sidebar Styling */
@@ -44,6 +44,9 @@ body {
     padding: 30px 20px;
     display: flex;
     flex-direction: column;
+    width: 240px;
+    height: 100%;
+    flex-shrink: 0;
 }
 
 .logo {
@@ -155,6 +158,9 @@ body {
 .main-content {
     padding: 30px;
     overflow-y: auto;
+    flex: 1;
+    height: 100%;
+    min-width: 0; /* Prevents flex items from growing oddly */
 }
 
 .top-bar {
@@ -247,7 +253,7 @@ body {
     border-left: 1px solid var(--glass-border);
     display: flex;
     flex-direction: column;
-    height: 100dvh;
+    height: 100%;
     width: 320px;
     position: relative;
     overflow: hidden;
