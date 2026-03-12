@@ -5,6 +5,9 @@ const transactions = [
     { id: "TXN_003", amount: 200.00, currency: "USDT", status: "COMPLETED", description: "Deposit from Binance", date: "Today, 9:30 AM", icon: "🪙" }
 ];
 
+// State Management
+let currentContext = null;
+
 // Initialize UI
 document.addEventListener('DOMContentLoaded', () => {
     loadTransactions();
@@ -90,22 +93,41 @@ async function handleUserInput() {
         const msg = text.toLowerCase();
         let category = "UNK";
         
-        // 🏗️ Multi-Layer Intent Router (Layer 1: Classification)
-        if (msg.includes("how") || msg.includes("apply") || msg.includes("can i")) category = "FAQ";
-        if (msg.includes("why") || msg.includes("order") || msg.includes("declined") || msg.includes("status")) category = "Ops";
-        if (msg.includes("lost") || msg.includes("stolen") || msg.includes("block") || msg.includes("freeze")) category = "Risk";
-        if (msg.includes("balance") || msg.includes("money") || msg.includes("usdt")) category = "Balance";
+        // --- 🏗️ CONTEXT-AWARE ROUTING (Intelligence Boost) ---
+        
+        // Handle Confirmations (Yes/Sure/Okay)
+        if (currentContext === "AUDIT_RECOVERY" && (msg.includes("sure") || msg.includes("yes") || msg.includes("ok") || msg.includes("go ahead"))) {
+            category = "Balance";
+            currentContext = null;
+        } 
+        // Handle "No/Stop"
+        else if (currentContext && (msg.includes("no") || msg.includes("stop") || msg.includes("nevermind"))) {
+            addMessage("Understood. Let me know if you need anything else.", "bot");
+            currentContext = null;
+            document.getElementById(typingId).remove();
+            return;
+        }
+        // Normal Intent Detection
+        else {
+            if (msg.includes("how") || msg.includes("apply") || msg.includes("can i")) category = "FAQ";
+            if (msg.includes("why") || msg.includes("order") || msg.includes("declined") || msg.includes("status")) category = "Ops";
+            if (msg.includes("lost") || msg.includes("stolen") || msg.includes("block") || msg.includes("freeze")) category = "Risk";
+            if (msg.includes("balance") || msg.includes("money") || msg.includes("total") || msg.includes("usdt")) category = "Balance";
+        }
 
         let data;
         
         // 🤝 Human-in-the-Loop (HITL) Check
         if (msg.includes("human") || msg.includes("agent") || msg.includes("person") || msg.includes("operator")) {
             data = {
-                text: "Handing over to a RedotPay Human Specialist. Estimated wait time: 2 mins.",
+                text: "Handing over to a RedotPay Human Specialist. Estimated wait time: 2 mins. (Context: " + (currentContext || "General") + ")",
                 action: "HITL_ESCALATION"
             };
         } else if (category !== "UNK") {
             data = domainAgents[category](msg);
+            // Update context based on agent action (e.g., if agent asks a question)
+            if (data.action === "AUDIT_RECOVERY") currentContext = "AUDIT_RECOVERY";
+            else currentContext = null;
         } else {
             data = {
                 text: "I'm not sure about that. I can help with 'How to apply', 'Transaction status', 'Balance', or 'Card security'. Or type 'human' to talk to us.",
@@ -130,21 +152,32 @@ async function handleUserInput() {
 
 function addLog(text, type) {
     const container = document.getElementById('log-container');
+    if (!container) return;
     const entry = document.createElement('div');
     entry.className = `log-entry ${type}`;
     entry.textContent = text;
     container.prepend(entry);
+    container.scrollTop = 0; // Logs prepend, so scroll to top
 }
 
 function addMessage(text, type) {
     const container = document.getElementById('chat-messages');
+    if (!container) return;
     const div = document.createElement('div');
     const id = "msg-" + Date.now();
     div.id = id;
     div.className = `msg ${type}`;
     div.textContent = text;
     container.appendChild(div);
-    container.scrollTop = container.scrollHeight;
+    
+    // 🔥 FIX: Ensure scroll happens AFTER DOM update
+    setTimeout(() => {
+        container.scrollTo({
+            top: container.scrollHeight,
+            behavior: 'smooth'
+        });
+    }, 50);
+    
     return id;
 }
 
